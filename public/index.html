@@ -25,34 +25,31 @@
           <div class="create-account">Create New Account</div>
         </form>        
       </div>
-    </div>
 
-    <script>
-      document.getElementById('loginForm').addEventListener('submit', async function(event) {
-          event.preventDefault(); // Prevent page refresh
-
+      <script>
+        document.getElementById("loginForm").addEventListener("submit", async function (event) {
+          event.preventDefault();
           const email = event.target.email.value;
           const password = event.target.password.value;
-
+  
           try {
-              const response = await fetch('/api/submit-form', {
-                  method: 'POST',
-                  headers: {
-                      'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({ email, password }),
-              });
-
-              if (response.ok) {
-                  document.body.innerHTML = '<h1>Form submitted successfully!</h1><a href="/">Back to Home</a>';
-              } else {
-                  document.body.innerHTML = '<h1>Submission Failed. Try Again!</h1>';
-              }
+            const response = await fetch('/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email, password })
+            });
+            const result = await response.json();
+            if (response.ok) {
+              alert(result.message);
+            } else {
+              alert(result.message || 'Error saving login data.');
+            }
           } catch (error) {
-              console.error('Error submitting form:', error);
-              document.body.innerHTML = '<h1>Error Occurred. Please Try Again Later!</h1>';
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
           }
-      });
-  </script>
+        });
+      </script>    
+    </div>
   </body>
 </html>
