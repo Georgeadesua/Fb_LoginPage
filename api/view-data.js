@@ -1,16 +1,15 @@
-// /api/view-data.js
-import { db } from '../firebase';
+import { connectToDatabase } from '../mongodb/mongodb';
 
 export default async function handler(req, res) {
     const auth = { login: 'admin', password: 'secret12' };
-
     const b64auth = (req.headers.authorization || '').split(' ')[1] || '';
     const [login, password] = Buffer.from(b64auth, 'base64').toString().split(':');
 
     if (login === auth.login && password === auth.password) {
         try {
-            const snapshot = await db.collection('formSubmissions').get();
-            let formSubmissions = snapshot.docs.map(doc => doc.data());
+            const db = await connectToDatabase();
+            const collection = db.collection('formSubmissions');
+            const formSubmissions = await collection.find().toArray();
 
             let htmlContent = '<h1>Secured Data</h1>';
             if (formSubmissions.length === 0) {

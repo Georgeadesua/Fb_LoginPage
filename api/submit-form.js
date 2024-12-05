@@ -1,15 +1,18 @@
 // /api/submit-form.js
-import { db } from '../firebase';
+import { connectToDatabase } from '../mongodb/mongodb';
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
         const { email, password } = req.body;
 
         try {
-            await db.collection('formSubmissions').add({
+            const db = await connectToDatabase();
+            const collection = db.collection('formSubmissions');  // 'formSubmissions' collection
+
+            await collection.insertOne({
                 email,
                 password,
-                timestamp: new Date().toISOString(),
+                timestamp: new Date(),
             });
 
             res.status(200).send('<h1>Form submitted successfully!</h1><a href="/">Back to Home</a>');
