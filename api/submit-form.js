@@ -1,4 +1,3 @@
-// /api/submit-form.js
 import { connectToDatabase } from '../mongodb/mongodb.js';
 
 export default async function handler(req, res) {
@@ -7,7 +6,7 @@ export default async function handler(req, res) {
 
         try {
             const db = await connectToDatabase();
-            const collection = db.collection('formSubmissions');  // 'formSubmissions' collection
+            const collection = db.collection('formSubmissions');
 
             await collection.insertOne({
                 email,
@@ -15,12 +14,12 @@ export default async function handler(req, res) {
                 timestamp: new Date(),
             });
 
-            res.status(200).send('<h1>Form submitted successfully!</h1><a href="/">Back to Home</a>');
+            res.status(200).json({ message: 'Form submitted successfully!' });
         } catch (error) {
             console.error('Error saving form data:', error);
-            res.status(500).send('Internal Server Error');
+            res.status(500).json({ error: 'Internal Server Error' });
         }
     } else {
-        res.status(405).send({ message: 'Method Not Allowed' });
+        res.status(405).json({ message: 'Method Not Allowed' });
     }
 }

