@@ -1,4 +1,4 @@
-import db from './firebase';
+import db from '../firebase';
 
 export default async function handler(req, res) {
     const auth = { login: 'admin', password: 'secret12' };
