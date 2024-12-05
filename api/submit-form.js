@@ -1,4 +1,5 @@
-import db from './firebase';
+// /api/submit-form.js
+import { db } from '../firebase';
 
 export default async function handler(req, res) {
     if (req.method === 'POST') {
@@ -8,7 +9,7 @@ export default async function handler(req, res) {
             await db.collection('formSubmissions').add({
                 email,
                 password,
-                timestamp: admin.firestore.FieldValue.serverTimestamp(),
+                timestamp: new Date().toISOString(),
             });
 
             res.status(200).send('<h1>Form submitted successfully!</h1><a href="/">Back to Home</a>');

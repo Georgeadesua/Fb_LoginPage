@@ -1,47 +1,29 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const path = require('path');
+import express from 'express';
+import bodyParser from 'body-parser';
+import { db } from '../firebase'; // Import db from your firebase module
+
 const app = express();
 
-// Serve static files
-app.use(express.static(path.join(__dirname, '../public')));
-
-// Parse form data
-app.use(bodyParser.urlencoded({ extended: true }));
+// Middleware for parsing JSON data
 app.use(bodyParser.json());
 
-// In-memory array to store submissions
-let formSubmissions = [];
-
-// Handle form submission
-app.post('/submit-form', (req, res) => {
+app.post('/submit', async (req, res) => {
     const { email, password } = req.body;
-    formSubmissions.push({ email, password });
-    res.send('<h1>Form submitted successfully!</h1><a href="/">Back to Home</a>');
-});
-
-// Secure route for viewing data
-app.get('/view-data', (req, res) => {
-    const auth = { login: 'admin', password: 'secret' };
-    const b64auth = (req.headers.authorization || '').split(' ')[1] || '';
-    const [login, password] = Buffer.from(b64auth, 'base64').toString().split(':');
-    if (login === auth.login && password === auth.password) {
-        let htmlContent = '<h1>Secured Data</h1>';
-        if (formSubmissions.length === 0) {
-            htmlContent += '<p>No data available yet.</p>';
-        } else {
-            htmlContent += '<ul>';
-            formSubmissions.forEach((submission, index) => {
-                htmlContent += `<li><strong>Entry ${index + 1}:</strong> Email: ${submission.email}, Password: ${submission.password}</li>`;
-            });
-            htmlContent += '</ul>';
-        }
-        res.send(htmlContent);
-    } else {
-        res.set('WWW-Authenticate', 'Basic realm="401"');
-        res.status(401).send('Authentication required.');
+    try {
+        // Save to Firebase
+        await db.collection('formSubmissions').add({
+            email,
+            password,
+            timestamp: new Date().toISOString(),
+        });
+        res.status(200).send('<h1>Form submitted successfully!</h1><a href="/">Back to Home</a>');
+    } catch (error) {
+        console.error('Error saving form data:', error);
+        res.status(500).send('Internal Server Error');
     }
 });
 
-// Export the app for Vercel
-module.exports = app;
+// Start the server
+app.listen(3000, () => {
+    console.log('Server is running on http://localhost:3000');
+});

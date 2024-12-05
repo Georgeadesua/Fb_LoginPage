@@ -1,4 +1,5 @@
-import db from '../firebase';
+// /api/view-data.js
+import { db } from '../firebase';
 
 export default async function handler(req, res) {
     const auth = { login: 'admin', password: 'secret12' };
