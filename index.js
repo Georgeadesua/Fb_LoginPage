@@ -2,41 +2,51 @@ import express from 'express';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import connectDb from './connectDb.js';
 
-// Create Express app
+// Load environment variables for local development
+dotenv.config();
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Connect to MongoDB
+// MongoDB Connection
+async function connectDb() {
+  try {
+    await mongoose.connect(
+      process.env.MONGODB_URI, // Access environment variable on Vercel
+      {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        serverSelectionTimeoutMS: 10000,
+        socketTimeoutMS: 45000,
+      }
+    );
+    console.log('MongoDB connected successfully!');
+  } catch (error) {
+    console.error('Error connecting to MongoDB:', error);
+  }
+}
+
 connectDb();
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
-// Serve static files from the 'public' folder
+// Serve static files from public
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Define schema and model
-const UserSchema = new mongoose.Schema({
-  email: { type: String, required: true },
-  password: { type: String, required: true },
-});
-const User = mongoose.model('User', UserSchema);
-
-// Handle login form submission
+// Routes
 app.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
-    }
+    const User = mongoose.model('User', new mongoose.Schema({ email: String, password: String }));
+
     const newUser = new User({ email, password });
     await newUser.save();
     res.status(201).json({ message: 'User saved successfully' });
@@ -45,7 +55,6 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// Start server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
